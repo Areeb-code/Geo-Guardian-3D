@@ -75,3 +75,15 @@ graph LR
     S5P -->|Smog Stats + XYZ URLs| API
     API -->|JSON Telemetry| UI
     API -->|XYZ Tile Streams| Globe
+🚀 Quick Start & InstallationPrerequisitesPython 3.10+ (tested on Python 3.13)A Google Cloud Project registered with Google Earth Engine1. Clone the Repository & Create Virtual EnvironmentPowerShellgit clone [https://github.com/your-username/GeoGardianSatellite.git](https://github.com/your-username/GeoGardianSatellite.git)
+cd GeoGardianSatellite
+
+# Windows PowerShell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+2. Install DependenciesPowerShellpip install --no-cache-dir -r requirements.txt
+3. Authenticate Google Earth Engine (One-Time Setup)PowerShellearthengine authenticate
+earthengine set_project satelite-514107
+(Update GCP_PROJECT_ID in backend/config.py if using your own GCP Project ID).4. Launch the FastAPI Backend (Terminal 1)PowerShelluvicorn backend.main:app --reload --port 8000
+Swagger API Docs: http://127.0.0.1:8000/docsHealth Check: http://127.0.0.1:8000/health5. Launch the 3D Frontend Dashboard (Terminal 2)PowerShellpython -m http.server 5500 --directory frontend
+Open http://127.0.0.1:5500 in Chrome, Edge, or Brave (ensure browser Hardware Acceleration is enabled for WebGL).🔌 API ReferenceGET /api/metricsComputes area telemetry (in $\text{km}^2$) and atmospheric aerosol statistics for any global location.Query Parameters:ParameterTypeDefaultDescriptionlocationstring"Lahore"Any city, district, or province worldwidemodestring"live""live" (2019 vs latest pass) or "compare" (year_a vs year_b)year_aint2019Baseline year (1984 – 2026)year_bint2025Target comparison year (1984 – 2026)smog_datestringnullOptional YYYY-MM-DD for date-specific Sentinel-5P smog inspectionrefreshboolfalseForces a fresh Earth Engine compute, bypassing cache
