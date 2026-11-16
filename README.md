@@ -25,7 +25,8 @@ Rapid, unregulated urban sprawl and seasonal atmospheric smog present critical e
 
 Users can query **any city, district, or province worldwide**, dynamically train a localized machine learning classifier adapted to that region's terrain, quantify agricultural-to-urban land conversion in square kilometers[cite: 2, 3], and inspect daily UV Aerosol Index smog plumes in real time[cite: 2, 3].
 
-![GeoGuardian 3D Dashboard Preview](reports/dashboard_screenshot.png)
+![GeoGuardian 3D Dashboard Preview](<img width="1363" height="606" alt="image" src="https://github.com/user-attachments/assets/504ba0c8-0107-4e52-b1f8-d5f4b1ead0bf" />
+)
 
 ---
 
