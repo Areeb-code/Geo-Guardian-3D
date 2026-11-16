@@ -1,0 +1,25 @@
+# --- Earth Engine & Cloud Authentication ---
+earthengine-api>=0.1.370
+google-auth>=2.20.0
+google-api-python-client>=2.90.0
+
+# --- Backend Web Framework ---
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.5.0
+pydantic-settings>=2.2.0
+
+# --- Spatial & Scientific Data Processing ---
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.11.0
+
+# --- Geo Tools (For local validation exports & processing) ---
+geopandas>=0.14.0
+shapely>=2.0.0
+pyproj>=3.6.0
+
+# --- Notebook Visualization & Utilities (Optional for Colab) ---
+folium>=0.15.0
+geemap>=0.30.0
+matplotlib>=3.8.0
