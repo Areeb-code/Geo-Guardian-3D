@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoGuardian 3D | Global Urban & Atmospheric Intelligence</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.147.0/Widgets/widgets.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.147.0/Cesium.js"></script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Full-Viewport 3D Earth Globe -->
+  <div id="cesiumContainer"></div>
+
+  <!-- Top-Left Floating Hamburger Icon (Visible when Left Dock is contracted) -->
+  <button id="btn-open-left" class="glass-fab left-fab hidden" title="Open Analytics & Controls">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- Top-Right Floating Layers Icon (Visible when Right Dock is contracted) -->
+  <button id="btn-open-right" class="glass-fab right-fab hidden" title="Open 3D Satellite Layers">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+      <polyline points="2 17 12 22 22 17"></polyline>
+      <polyline points="2 12 12 17 22 12"></polyline>
+    </svg>
+  </button>
+
+  <!-- Top-Center Floating Glass Search & Status Pill -->
+  <header class="glass-pill top-bar">
+    <div class="brand">
+      <span class="pulse-dot"></span>
+      <span class="brand-title">GeoGuardian <strong>3D</strong></span>
+    </div>
+
+    <form id="location-form" class="search-group">
+      <input
+        type="text"
+        id="location-input"
+        placeholder="Search any city worldwide (e.g. Lahore, Multan, Tokyo)..."
+        value="Lahore"
+        autocomplete="off"
+      />
+      <button type="submit" class="btn-icon" title="Analyze & Fly to Location">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </form>
+
+    <div class="camera-actions">
+      <button id="btn-fly-aoi" class="chip-btn" title="Recenter on Target">Focus AOI</button>
+      <button id="btn-tilt-3d" class="chip-btn" title="Toggle 3D Horizon Tilt">3D Tilt</button>
+    </div>
+  </header>
+
+  <!-- Left Floating Glassmorphic Control & Analytics Dock -->
+  <aside id="left-dock" class="glass-panel left-dock">
+    <div class="dock-top-row">
+      <span class="eyebrow">Mission Control</span>
+      <button type="button" id="btn-close-left" class="dock-collapse-btn" title="Minimize to Icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Animated Sliding Mode Switcher -->
+    <div class="segmented-tabs" data-active="live">
+      <div class="tab-glider"></div>
+      <button type="button" class="tab-btn active" data-tab="live">Live Monitor</button>
+      <button type="button" class="tab-btn" data-tab="compare">Compare Years</button>
+    </div>
+
+    <!-- Animated Tab Views -->
+    <div class="tab-content-wrapper">
+      <!-- TAB 1: LIVE MONITOR -->
+      <div id="panel-live" class="tab-pane active">
+        <div class="control-block">
+          <label for="live-smog-date">Specific Smog Date (Optional)</label>
+          <div class="input-row">
+            <input type="date" id="live-smog-date" class="glass-input" />
+            <button type="button" id="btn-clear-date" class="chip-btn small" title="Reset to Latest Live">Live</button>
+          </div>
+        </div>
+        <button type="button" id="btn-run-live" class="btn-primary">
+          <span class="btn-text">Sync Live Satellite Pass</span>
+        </button>
+      </div>
+
+      <!-- TAB 2: HISTORICAL COMPARISON -->
+      <div id="panel-compare" class="tab-pane">
+        <div class="year-grid">
+          <div class="control-block">
+            <label for="year-a">Baseline Year</label>
+            <select id="year-a" class="glass-input"></select>
+          </div>
+          <div class="control-block">
+            <label for="year-b">Target Year</label>
+            <select id="year-b" class="glass-input"></select>
+          </div>
+        </div>
+        <button type="button" id="btn-run-compare" class="btn-primary">
+          <span class="btn-text">Run Multi-Year Analysis</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Active AOI Header -->
+    <div class="aoi-header">
+      <div>
+        <span class="eyebrow">Active Region</span>
+        <h2 id="ui-aoi-name">Lahore District, Pakistan</h2>
+      </div>
+      <span id="ui-total-area" class="badge-mono">1802.93 km²</span>
+    </div>
+
+    <!-- Telemetry Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card accent-emerald">
+        <span class="metric-label">Vegetation → Built-Up</span>
+        <div id="ui-converted" class="metric-value">-- km²</div>
+        <div id="ui-loss-pct" class="metric-sub">--% farmland converted</div>
+      </div>
+
+      <div class="metric-card accent-amber">
+        <span class="metric-label">Atmospheric Smog</span>
+        <div id="ui-smog-status" class="metric-value">--</div>
+        <div id="ui-smog-index" class="metric-sub">UV Aerosol Index: --</div>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label" id="ui-label-a">Baseline Built-Up</span>
+        <div id="ui-built-a" class="metric-value small">-- km²</div>
+        <div id="ui-veg-a" class="metric-sub">Veg: -- km²</div>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label" id="ui-label-b">Target Built-Up</span>
+        <div id="ui-built-b" class="metric-value small">-- km²</div>
+        <div id="ui-veg-b" class="metric-sub">Veg: -- km²</div>
+      </div>
+    </div>
+
+    <div class="status-footer">
+      <span id="ui-window-info">Initializing satellite telemetry...</span>
+    </div>
+  </aside>
+
+  <!-- Right Floating Glass Layer Stack & Legend -->
+  <aside id="right-dock" class="glass-panel right-dock">
+    <div class="dock-header">
+      <div>
+        <h3>3D Satellite Layers</h3>
+        <span class="eyebrow">Opacity & Toggle</span>
+      </div>
+      <button type="button" id="btn-close-right" class="dock-collapse-btn" title="Minimize to Icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <div class="layer-list">
+      <div class="layer-item">
+        <div class="layer-top">
+          <label class="switch-label">
+            <input type="checkbox" id="toggle-rgb-b" checked />
+            <span>Target Optical RGB</span>
+          </label>
+          <span class="layer-tag" id="tag-rgb-b">2025</span>
+        </div>
+        <input type="range" id="alpha-rgb-b" min="0" max="1" step="0.05" value="1" class="glass-slider" />
+      </div>
+
+      <div class="layer-item">
+        <div class="layer-top">
+          <label class="switch-label">
+            <input type="checkbox" id="toggle-rgb-a" />
+            <span>Baseline Optical RGB</span>
+          </label>
+          <span class="layer-tag" id="tag-rgb-a">2019</span>
+        </div>
+        <input type="range" id="alpha-rgb-a" min="0" max="1" step="0.05" value="1" class="glass-slider" />
+      </div>
+
+      <div class="layer-item">
+        <div class="layer-top">
+          <label class="switch-label">
+            <input type="checkbox" id="toggle-change" checked />
+            <span>Urban Expansion Mask</span>
+          </label>
+          <span class="dot-swatch" style="background:#ff3b5c;"></span>
+        </div>
+        <input type="range" id="alpha-change" min="0" max="1" step="0.05" value="0.9" class="glass-slider" />
+      </div>
+
+      <div class="layer-item">
+        <div class="layer-top">
+          <label class="switch-label">
+            <input type="checkbox" id="toggle-class-b" />
+            <span>AI Land Cover (Target)</span>
+          </label>
+        </div>
+        <input type="range" id="alpha-class-b" min="0" max="1" step="0.05" value="0.8" class="glass-slider" />
+      </div>
+
+      <div class="layer-item">
+        <div class="layer-top">
+          <label class="switch-label">
+            <input type="checkbox" id="toggle-smog-b" />
+            <span>Sentinel-5P Smog Plume</span>
+          </label>
+        </div>
+        <input type="range" id="alpha-smog-b" min="0" max="1" step="0.05" value="0.7" class="glass-slider" />
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Integrated Color Legend -->
+    <div class="legend-section">
+      <span class="eyebrow">Classification & Aerosol Key</span>
+      <div class="legend-pills">
+        <span class="l-pill"><i style="background:#22c55e;"></i>Vegetation</span>
+        <span class="l-pill"><i style="background:#94a3b8;"></i>Built-Up</span>
+        <span class="l-pill"><i style="background:#facc15;"></i>Barren/Water</span>
+        <span class="l-pill"><i style="background:#ff3b5c;"></i>Converted</span>
+      </div>
+
+      <div class="smog-bar-wrap">
+        <div class="smog-bar"></div>
+        <div class="smog-ticks">
+          <span>Clean (-0.5)</span>
+          <span>Haze (1.0)</span>
+          <span>Severe (2.5+)</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Loading Overlay Toast -->
+  <div id="loading-toast" class="glass-pill loading-toast hidden">
+    <div class="spinner"></div>
+    <span id="loading-text">Querying Google Earth Engine...</span>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
