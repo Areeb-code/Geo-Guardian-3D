@@ -1,3 +1,5 @@
+<img width="1024" height="434" alt="image" src="https://github.com/user-attachments/assets/08bba73e-2ca9-454a-b32d-b7b8b6303e36" />
+
 <div align="center">
 
 # 🌍 GeoGuardian 3D
